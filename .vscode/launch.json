@@ -1,0 +1,71 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Engine Launcher",
+            "type": "cppvsdbg", // or "cppdbg" for GDB/MinGW
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {"name": "PATH", "value": "${env:PATH};${workspaceFolder}/bin"} 
+            ],
+            "console": "externalTerminal"
+        },
+        {
+            "name": "Run ganderED",
+            "type": "cppvsdbg", // or "cppdbg" for GDB/MinGW
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {"name": "PATH", "value": "${env:PATH};${workspaceFolder}/bin"} 
+            ],
+            "console": "internalConsole"
+        },
+        {
+            "name": "Debug JVox",
+            "type": "cppvsdbg", // or "cppdbg" for GDB/MinGW
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [
+                "+base",
+                "../../../dev/gamedev/jv",
+                "+developer",
+                "0",
+                "+width",
+                "800",
+                "+height",
+                "600",
+                "+fov",
+                "90"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {"name": "PATH", "value": "${env:PATH};${workspaceFolder}/bin"} 
+            ],
+            "console": "externalTerminal"
+        },
+        {
+            "name": "Debug Gander",
+            "type": "cppvsdbg", // or "cppdbg" for GDB/MinGW
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [
+                "+base",
+                "D:/dev/gamedev/gander-tester/base"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {"name": "PATH", "value": "${env:PATH};${workspaceFolder}/bin"} 
+            ],
+            "console": "externalTerminal"
+        }
+    ]
+}
