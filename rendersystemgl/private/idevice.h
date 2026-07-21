@@ -93,7 +93,7 @@ public:
     //create a shader of specified type with provided code
     virtual uint                CreateShader(uint8 type, char* sourceCode) = 0;
     //give all compiled shader and it will return a program using them.
-    virtual uint                CreateShaderPipeline(uint* shaders) = 0;
+    virtual uint                CreateShaderPipeline(uint* shaders, int count) = 0;
     //set the current shader
     virtual void                SetShaderPipeline(uint pipeline) = 0;
 

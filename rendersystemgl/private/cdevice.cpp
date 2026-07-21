@@ -13,7 +13,7 @@ public:
     virtual void                RenderTargetSetColorArray(float* rgba);
     virtual void                RenderTargetClear(uint8 targets);
     virtual uint                CreateShader(uint8 type, char* sourceCode);
-    virtual uint                CreateShaderPipeline(uint* shaders);
+    virtual uint                CreateShaderPipeline(uint* shaders, int count);
     virtual void                SetShaderPipeline(uint pipeline);
     virtual uint                CreateBuffer(uint8 type, uint8 flags);
     virtual uint                CreateMappedBuffer();
@@ -75,11 +75,46 @@ void CRenderDevice::RenderTargetClear(uint8 targets) {
 }
 
 uint CRenderDevice::CreateShader(uint8 type, char* sourceCode) {
+    GLint compiled;
+
+    uint8 glType;
+    switch(type) {
+        case QRST_VERTEX: glType = GL_VERTEX_SHADER; break;
+        case QRST_FRAGMENT: glType = GL_FRAGMENT_SHADER; break;
+        case QRST_COMPUTE: glType = GL_COMPUTE_SHADER; break;
+        case QRST_GEOMETRY: glType = GL_GEOMETRY_SHADER; break;
+        case QRST_TESSELATOR: glType = GL_TESS_CONTROL_SHADER; break;
+    }
+    uint shader = glCreateShader(GL_VERTEX_SHADER);
+
+    glShaderSource(shader, 1, &sourceCode, NULL);
+    glCompileShader(shader);
+
+    if(compiled) {
+        // fprintf(stderr, "(engine) failed to compile shader, type: '%s'\n %s\n", type, infoLog);
+        return shader;
+    };
+
+
+    char infoLog[512];
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    glGetShaderInfoLog(shader, 512, NULL, infoLog);
     return 0;
 }
 
-uint CRenderDevice::CreateShaderPipeline(uint* shaders) {
-    return 0;
+uint CRenderDevice::CreateShaderPipeline(uint* shaders, int count) {
+    uint out;
+
+    out = glCreateProgram();
+
+    for(int i = 0; i < count; ++i) {
+        if(shaders[i] > 0) {
+            glAttachShader(out, shaders[i]);
+        }
+    }
+
+    glLinkProgram(out);
+    return out;
 }
 
 void CRenderDevice::SetShaderPipeline(uint pipeline) {}
