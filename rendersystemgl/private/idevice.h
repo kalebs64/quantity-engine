@@ -75,7 +75,8 @@ enum pipeBarrier_t : uint8 {
 struct drawIndirect_t {
     uint count;
     uint instanceCount;
-    uint first;
+    uint firstIndex;
+    uint baseVertex;
     uint baseInstance;
 };
 
@@ -125,6 +126,7 @@ public:
     virtual void                SetTextureAtSlot(uint texture, int slot) = 0;
     virtual void                SetImageTextureAtSlot(uint texture, int level, uint8 accessFlags, uint32 format, int slot) = 0;
     virtual void                SetTextureAtSpecificLevelAtSlot(uint texture, int level, uint8 format, int slot) = 0;
+    virtual void                BlitTextureToScreen(uint texture, int width, int height) = 0;
 
     //indirect rendering command.
     virtual void                DrawIndexedIndirect(uint bufferForArgs, int drawCount) = 0;

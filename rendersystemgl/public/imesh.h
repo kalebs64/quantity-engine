@@ -1,6 +1,12 @@
 #pragma once
 #include <types.h>
 
+struct vertex_t {
+    float pos[3];
+    float normal[3];
+    float uv[2];
+};
+
 typedef struct poolSliceData_s {
     uint32                      vertexCacheOffset;
     uint32                      indexCacheOffset;

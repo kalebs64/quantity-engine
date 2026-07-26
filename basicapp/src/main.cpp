@@ -42,7 +42,7 @@ int CTestApplication::OnInit() {
     std::cout << "init." << std::endl;
     int i = 0;
 
-    g_fileSystem->InitAndSetBase("D:/dev/gamedev/gander-tester/base");
+    g_fileSystem->InitAndSetBase("D:/dev/gamedev/quantitystd/base");
     i = g_media->Init();
 
     if(i != SYS_INIT_OK) {

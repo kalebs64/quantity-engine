@@ -1,4 +1,5 @@
 #include "ishadersystem.h"
+#include "idevice.h"
 #include <ifilesystem.h>
 #include <glad/glad.h>
 #include <unordered_map>
@@ -10,6 +11,7 @@ public:
     virtual void    Init();
     virtual void    RegisterFolder(const char* folderName);
     virtual uint    ObtainProgramVariant(const char* vertexPath, const char* fragmentPath, const std::vector<std::string>& defines);
+    virtual uint    ObtainComputeProgram(const char* computeName, const std::vector<std::string>& defines);
 private:
     std::string     ReadFileToString(const std::string& path);
     std::string     ResolveIncludes(const std::string& path, std::unordered_map<std::string, bool>& guards);
@@ -21,7 +23,7 @@ private:
 
     bool            CompileCheck(uint shader, const char* type);
 private:
-    std::unordered_map<std::string, uint>   inMemoryShaders;
+    std::unordered_map<std::string, uint>   m_inMemoryShaders;
     const char*     registeredFolder;
 };
 
@@ -42,7 +44,7 @@ uint jkShaderSystemLocal::ObtainProgramVariant(const char* vertexPath, const cha
     std::string key = GenVariantKey(vertexPath, fragmentPath, defines);
     
     //Get from memory
-    if(inMemoryShaders.count(key)) return inMemoryShaders[key];
+    if(m_inMemoryShaders.count(key)) return m_inMemoryShaders[key];
 
     //Get from cache
 
@@ -53,13 +55,32 @@ uint jkShaderSystemLocal::ObtainProgramVariant(const char* vertexPath, const cha
         //cache it on disk
 
         //store in memory
-        inMemoryShaders[key] = prog;
+        m_inMemoryShaders[key] = prog;
         //return it too
         return prog;
     }
 
     //failed
     return 0;
+}
+
+uint jkShaderSystemLocal::ObtainComputeProgram(const char* computeName, const std::vector<std::string>& defines) {
+    std::string key = GenVariantKey(computeName, "", defines);
+
+    if(m_inMemoryShaders.count(key)) return m_inMemoryShaders[key];
+
+    std::string cSrc = PrepareSourceCode(computeName, defines);
+
+    uint cs = g_renderDevice->CreateShader(QRST_COMPUTE, const_cast<char*>(cSrc.c_str()));
+    if(cs == 0) return 0;
+
+    uint pPipeline = g_renderDevice->CreateShaderPipeline(&cs, 1);
+
+    if(pPipeline != 0) {
+        m_inMemoryShaders[key] = pPipeline;
+    }
+
+    return pPipeline;
 }
 
 std::string jkShaderSystemLocal::ReadFileToString(const std::string& path) {
@@ -145,23 +166,28 @@ uint jkShaderSystemLocal::BuildFromSource(const char* vertexPath, const char* fr
     const char* vPtr = vSrc.c_str();
     const char* fPtr = fSrc.c_str();
 
-    uint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vPtr, NULL);
-    CompileCheck(vs, "vertex_shader_46");
+    // uint vs = glCreateShader(GL_VERTEX_SHADER);
+    // glShaderSource(vs, 1, &vPtr, NULL);
+    // CompileCheck(vs, "vertex_shader_46");
 
-    uint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &fPtr, NULL);
-    CompileCheck(fs, "fragment_shader_46");
+    // uint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    // glShaderSource(fs, 1, &fPtr, NULL);
+    // CompileCheck(fs, "fragment_shader_46");
 
-    uint prog = glCreateProgram();
-    glAttachShader(prog, vs);
-    glAttachShader(prog, fs);
-    glProgramParameteri(prog, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
-    glLinkProgram(prog);
+    // uint prog = glCreateProgram();
+    // glAttachShader(prog, vs);
+    // glAttachShader(prog, fs);
+    // glProgramParameteri(prog, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+    // glLinkProgram(prog);
+    uint vs = g_renderDevice->CreateShader(QRST_VERTEX, const_cast<char*>(vSrc.c_str()));
+    uint fs = g_renderDevice->CreateShader(QRST_FRAGMENT, const_cast<char*>(fSrc.c_str()));
 
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-    return prog;
+    uint shaders[] = { vs, fs };
+    uint pipeline = g_renderDevice->CreateShaderPipeline(shaders, 2);
+
+    // glDeleteShader(vs);
+    // glDeleteShader(fs);
+    return pipeline;
 }
 
 std::string jkShaderSystemLocal::PrepareSourceCode(const char* path, const std::vector<std::string>& defines) {

@@ -1,5 +1,6 @@
 #include "idevice.h"
 #include <glad/glad.h>
+#include <iostream>
 
 class CRenderDevice : public IRenderDevice {
 public:
@@ -26,6 +27,7 @@ public:
     virtual void                SetTextureAtSlot(uint texture, int slot);
     virtual void                SetImageTextureAtSlot(uint texture, int level, uint8 accessFlags, uint32 format, int slot);
     virtual void                SetTextureAtSpecificLevelAtSlot(uint texture, int level, uint8 format, int slot);
+    virtual void                BlitTextureToScreen(uint texture, int width, int height);
     virtual void                DrawIndexedIndirect(uint bufferForArgs, int drawCount);
     virtual void                PipelineBarrierWait(uint8 barrier);
     virtual void                Flush();
@@ -169,6 +171,7 @@ uint CRenderDevice::CreateShader(uint8 type, char* sourceCode) {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         glDeleteShader(shader);
+        std::cout << infoLog << std::endl;
         return 0;
     }
 
@@ -286,6 +289,10 @@ uint CRenderDevice::CreateTexture(int width, int height, uint32 format, byte_t* 
         case QRTF_R8G8:             internalFormat = GL_RG8;        pixelFormat = GL_RG;        dataFormat = GL_UNSIGNED_BYTE; break;
         case QRTF_R8G8B8:           internalFormat = GL_RGB8;       pixelFormat = GL_RGB;       dataFormat = GL_UNSIGNED_BYTE; break;
         case QRTF_R8G8B8A8:         internalFormat = GL_RGBA8;      pixelFormat = GL_RGBA;      dataFormat = GL_UNSIGNED_BYTE; break;
+
+        case QRTF_D32:              internalFormat = GL_DEPTH_COMPONENT32F; pixelFormat = GL_DEPTH_COMPONENT;       dataFormat = GL_FLOAT; break;
+        case QRTF_D24:              internalFormat = GL_DEPTH_COMPONENT24;  pixelFormat = GL_DEPTH_COMPONENT;       dataFormat = GL_UNSIGNED_INT; break;
+        case QRTF_D16:              internalFormat = GL_DEPTH_COMPONENT16;  pixelFormat = GL_DEPTH_COMPONENT;       dataFormat = GL_UNSIGNED_SHORT; break;
     }
 
     glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -304,6 +311,14 @@ void CRenderDevice::DestroyTexture(uint texture) {
 
 void CRenderDevice::SetTextureAtSpecificLevelAtSlot(uint texture, int level, uint8 format, int slot) {
     glBindTextureUnit(slot, texture);
+}
+
+void CRenderDevice::BlitTextureToScreen(uint texture, int width, int height) {
+    uint readFBO = 0;
+    glCreateFramebuffers(1, &readFBO);
+    glNamedFramebufferTexture(readFBO, GL_COLOR_ATTACHMENT0, texture, 0);
+    glBlitNamedFramebuffer(readFBO, 0, 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glDeleteFramebuffers(1, &readFBO);
 }
 
 void CRenderDevice::DrawIndexedIndirect(uint bufferForArgs, int drawCount) {

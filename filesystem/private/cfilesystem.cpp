@@ -86,14 +86,14 @@ IFile* CFileSystem::Open(std::string path, uint16 mode) {
     // std::string pp = rootPath + '/' + baseDir + '/' + path;
     std::string pp = BuildPath(path);
 
-    CBaseFile* file = new CBaseFile();
+    CBaseFile* file = new CBaseFile(pp.c_str(), mode);
 
     if(!file) {
         std::cout << "failed to open " << path << std::endl;
         return nullptr;
     }
 
-    file->Open(path.c_str(), mode);
+    // file->Open(path.c_str(), mode);
     return file;
 }
 

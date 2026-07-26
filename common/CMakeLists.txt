@@ -15,6 +15,7 @@ add_library(${BINARY_VERSION} STATIC
     "appframework/system.cpp"
     "appframework/application.cpp"
     "appframework/appframework.cpp"
+    tier0.cpp
 )
 
 target_link_libraries(${BINARY_VERSION} PUBLIC eigen)

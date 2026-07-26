@@ -34,6 +34,7 @@ sysInitValue_t CRenderSystemOpenGL::Init() {
             SetCurrentRenderRect(wnd->GetWidth(), wnd->GetHeight());
 
             g_shaderSystem->Init();
+            g_renderWorld->Init();
 
             return SYS_INIT_OK;
         }
@@ -73,8 +74,6 @@ void CRenderSystemOpenGL::SetCurrentRenderRect(int width, int height) {
 }
 
 void CRenderSystemOpenGL::Frame() {
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     g_renderWorld->Frame();
 }
