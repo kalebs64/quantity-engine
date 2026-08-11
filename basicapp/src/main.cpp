@@ -1,12 +1,19 @@
 #include <appframework/appframework.h>
 #include <ifilesystem.h>
 #include <irendersystem.h>
+#include <itexture.h>
 #include <imedia.h>
+#include <iimageloader.h>
+#include <iinputsystem.h>
 #include <tier0.h>
 #include <iostream>
+#include <string>
 
 IFileSystem* g_fileSystem;
 IMedia* g_media;
+IImageLoader* g_imageLoader;
+// IInputSystem* g_inputSystem;
+ITextureManager* g_textureManager;
 IRenderSystemOpenGL* g_renderSystemGL;
 
 class CTestApplication : public CBaseApplication {
@@ -30,7 +37,10 @@ bool CTestApplication::Create() {
 
     g_fileSystem = (IFileSystem*)FindSystemAt(0);
     g_media = (IMedia*)FindSystemAt(1);
+    // g_inputSystem = (IInputSystem*)g_media->QueryInterface(QUANTITY_INPUTSYSTEM_VERSION);
+    g_imageLoader = (IImageLoader*)g_media->QueryInterface(QUANTITY_IMAGELOADER_VERSION);
     g_renderSystemGL = (IRenderSystemOpenGL*)FindSystemAt(2);
+    g_textureManager = (ITextureManager*)g_renderSystemGL->QueryInterface(QUANTITY_TEXTUREMANAGER_VERSION);
 
     TryConnectAllSystems();
     return true;
@@ -71,6 +81,15 @@ void CTestApplication::OnShutdown() {
 
 int CTestApplication::Main() {
     std::cout << "main." << std::endl;
+
+    std::string imgPath = g_fileSystem->BuildPath("textures/dev/altdev_generic01.png");
+
+    quantityImage_t img = {};
+    img.m_name = imgPath.c_str();
+
+    g_imageLoader->FlipImagesOnLoad(true);
+    g_imageLoader->LoadImage(&img);
+    ITexture* txt = g_textureManager->LoadImage(img.m_data, img.m_width, img.m_height, IT_RGBA8F, true);
 
     while(!g_media->CloseRequested()) {
         g_media->Poll();

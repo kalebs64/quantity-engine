@@ -1,64 +1,53 @@
 #pragma once
-#include "itexture.h"
-#include <ifilesystem.h>
+#include "ctexture.h"
+#include "enums.h"
+#include "idevice.h"
 
-class CTexture : public ITexture {
-public:
-                                CTexture();
-
-    void                        Bind();
-    bool                        LoadFromRawBytes2D(const byte_t* picBytes, int w, int h, imageFormat_t format, materialInputType_t inputSlot);
-    void                        PurgeImage();
-
-    void                        SetIsDependency(bool value);
-    bool                        IsLoaded() {return !m_purged;}
-    bool                        IsDependency() {return m_isDependency;}
-
-    std::string                 Name() const {return m_name;}
-    void                        SetName(std::string newName);
-
-    uint                        GLHandle() {return m_glHandle;}
-    materialInputType_t         GetInputSlot() {return m_inputType;}
-private:
-    imageType_t                 m_type;
-    materialInputType_t         m_inputType;
-
-    int                         m_width;
-    int                         m_height;
-
-    bool                        m_isDependency;
-    bool                        m_purged;
-
-    std::string                 m_name;
-
-    uint                        m_glHandle;
-
-    byte_t*                     m_data;
-};
-
-class CTextureSystem : public ITextureSystem {
-public:
-    virtual void                        Init();
-    virtual void                        Shutdown();
-
-    //Loads only .bit images into memory
-    virtual ITexture*                   LoadImage(const char* path, imageType_t type, imageFormat_t format, materialInputType_t inputSlot);
-    virtual ITexture*                   GetImage(const char* name) const;
-
-    virtual void                        ReloadLoaded();
-};
-
-CTextureSystem texman;
-ITextureSystem* g_textureSystem = &texman;
-
-void CTextureSystem::Init() {
-    g_fileSystem->RegisterPathAlias("directory_texture", "art/materials");
+CTexture::CTexture() {
+    m_width = 0;
+    m_height = 0;
+    m_purged = true;
+    m_handle = -1;
+    m_bindlessHandle = Uint2(0);
+    m_name = "undefined";
 }
 
-void CTextureSystem::Shutdown() {}
+bool CTexture::LoadFromRawBytes2D(const byte_t* pImageBytes, int pWidth, int pHeight, imageFormat_t pFormat, bool pBindless) {
+    uint32 format;
 
-ITexture* CTextureSystem::LoadImage(const char* path, imageType_t type, imageFormat_t format, materialInputType_t inputSlot) {}
+    m_width = pWidth;
+    m_height = pHeight;
 
-ITexture* CTextureSystem::GetImage(const char* name) const {}
+    switch(pFormat) {
+        case IT_RGBA32F: format = QRTF_R32G32B32A32; break;
+        case IT_RGBA16F: format = QRTF_R16G16B16A16; break;
+        case IT_RGBA8F: format =  QRTF_R8G8B8A8; break;
+        default: break;
+    }
 
-void CTextureSystem::ReloadLoaded() {}
+    m_handle = g_renderDevice->CreateTexture(m_width, m_height, format, pImageBytes);
+    if(m_handle && pBindless) {
+        m_bindlessHandle = g_renderDevice->MarkTextureBindless(m_handle);
+        m_purged = false;
+
+        int uuid = m_width + m_height + m_handle + (int)m_purged + m_bindlessHandle.x + m_bindlessHandle.y;
+        std::string generatedName = "itexture_";
+
+        generatedName += std::to_string(uuid);
+
+        char* copy = new char[generatedName.length() + 1];
+        std::strcpy(copy, generatedName.c_str());
+
+        m_name = copy;
+        return true;
+    }
+    return false;
+}
+
+void CTexture::PurgeImage() {
+
+}
+
+void CTexture::SetName(const char* pName) {
+    m_name = pName;
+}

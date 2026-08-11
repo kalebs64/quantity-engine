@@ -1,6 +1,9 @@
 #include "irendersystem.h"
 #include "ishadersystem.h"
+#include "isharedvram.h"
 #include "irenderworld.h"
+#include "idevice.h"
+#include "itexture.h"
 #include <ifilesystem.h>
 #include <imedia.h>
 #include <glad/glad.h>
@@ -33,12 +36,16 @@ sysInitValue_t CRenderSystemOpenGL::Init() {
         if(gladLoadGLLoader(wnd->GetProcAddress())) {
             SetCurrentRenderRect(wnd->GetWidth(), wnd->GetHeight());
 
+            g_renderDevice->Init();
+            g_sharedVRAM->Init();
             g_shaderSystem->Init();
             g_renderWorld->Init();
 
             return SYS_INIT_OK;
         }
     }
+
+    return SYS_INIT_FAILED;
 }
 
 void CRenderSystemOpenGL::Shutdown() {}
@@ -58,7 +65,10 @@ bool CRenderSystemOpenGL::ConnectThroughFactory(InterfaceCreateFunc factory) {
 }
 
 void* CRenderSystemOpenGL::QueryInterface(const char* interfaceName) {
-    if(strcmp(interfaceName, QUANTITY_SHADERSYSTEM_VERSION)) {
+    if(strcmp(interfaceName, QUANTITY_TEXTUREMANAGER_VERSION) == 0) {
+        return g_textureManager;
+    }
+    else if(strcmp(interfaceName, QUANTITY_SHADERSYSTEM_VERSION)) {
         return g_shaderSystem;
     }
     else if(strcmp(interfaceName, QUANTITY_RENDERWORLD_VERSION) == 0) {

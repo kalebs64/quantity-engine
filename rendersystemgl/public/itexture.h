@@ -2,20 +2,6 @@
 #include <types.h>
 #include <string>
 
-struct bimgHeader_t {
-    char    magic[4]; // BIMG
-    int     version;
-    int     imageType;
-    int     materialInputType;
-    int     width;
-    int     height;
-    int     depth;
-    int     mipCount;
-    int     format;
-    bool    useMips;
-    bool    usingFTT;
-};
-
 enum imageType_t : uint32 {
     IT_2D = 0,
     IT_3D
@@ -47,31 +33,25 @@ enum imageFilter_t : uint32 {
 
 class ITexture {
 public:
-    virtual void                        Bind() = 0;
-    virtual bool                        LoadFromRawBytes2D(const byte_t* picBytes, int w, int h, imageFormat_t format, materialInputType_t inputSlot) = 0;
+    virtual bool                        LoadFromRawBytes2D(const byte_t* pImageBytes, int pWidth, int pHeight, imageFormat_t pFormat, bool pBindless) = 0;
     virtual void                        PurgeImage() = 0;
 
-    virtual void                        SetIsDependency(bool value) = 0;
     virtual bool                        IsLoaded() = 0;
-    virtual bool                        IsDependency() = 0;
 
-    virtual std::string                 Name() const = 0;
-    virtual void                        SetName(std::string newName) = 0;
-
-    virtual uint                        GLHandle() = 0;
-    virtual materialInputType_t         GetInputSlot() = 0;
+    virtual const char*                 Name() const = 0;
+    virtual void                        SetName(const char* newName) = 0;
 };
 
-class ITextureSystem {
+class ITextureManager {
 public:
     virtual void                        Init() = 0;
     virtual void                        Shutdown() = 0;
+    
+    virtual const char*                 ListContents() = 0;
 
-    //Loads only .bit images into memory
-    virtual ITexture*                   LoadImage(const char* path, imageType_t type, imageFormat_t format, materialInputType_t inputSlot) = 0;
+    virtual ITexture*                   LoadImage(const byte_t* pImageBytes, int pWidth, int pHeight, imageFormat_t pFormat, bool pBindless) = 0;
     virtual ITexture*                   GetImage(const char* name) const = 0;
-
-    virtual void                        ReloadLoaded() = 0;
 };
 
-extern ITextureSystem* g_textureSystem;
+#define QUANTITY_TEXTUREMANAGER_VERSION "QUANTITY_TXTRMAN_001"
+extern ITextureManager* g_textureManager;

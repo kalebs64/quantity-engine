@@ -9,11 +9,18 @@
 #define stripped_vclass class STRIP_VTABLE
 
 #ifdef _MSC_VER
-#define ALIGN4      DECL_ALIGN(4)
-#define ALIGN8      DECL_ALIGN(8)
-#define ALIGN16     DECL_ALIGN(16)
-#define ALIGN32     DECL_ALIGN(32)
-#define ALIGN128    DECL_ALIGN(128)
+#if 0
+#define ALIGN4      DECL_ALIGN(align(4))
+#define ALIGN8      DECL_ALIGN(align(8))
+#define ALIGN16     DECL_ALIGN(align(16))
+#define ALIGN32     DECL_ALIGN(align(32))
+#define ALIGN128    DECL_ALIGN(align(128))
+#endif
+#define ALIGN4      alignas(4)
+#define ALIGN8      alignas(8)
+#define ALIGN16     alignas(16)
+#define ALIGN32     alignas(32)
+#define ALIGN128    alignas(128)
 #endif
 
 #if defined(_WIN32)

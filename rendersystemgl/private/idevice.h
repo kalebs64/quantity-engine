@@ -1,76 +1,7 @@
 #pragma once
 #include <appframework/appframework.h>
 #include <types.h>
-
-enum clearTarget_t : uint8 {
-    RDCT_COLOR              = 1 << 0,
-    RDCT_DEPTH              = 1 << 1,
-    RDCT_STENCIL            = 1 << 2
-};
-
-enum textureFormat_t : uint32 {
-    //color
-    QRTF_R32                = 0,
-    QRTF_R16,
-    QRTF_R8,
-    QRTF_R32G32,
-    QRTF_R16G16,
-    QRTF_R8G8,
-    QRTF_R32G32B32,
-    QRTF_R16G16B16,
-    QRTF_R8G8B8,
-    QRTF_R32G32B32A32,
-    QRTF_R16G16B16A16,
-    QRTF_R8G8B8A8,
-    //depth
-    QRTF_D32,
-    QRTF_D24,
-    QRTF_D16,
-    QRTF_FORMAT_MAX
-};
-
-
-enum targetAttachPoint_t : uint8 {
-    QTAP_COLOR = 0,
-    QTAP_DEPTH,
-    QTAP_STENCIL
-};
-
-enum shaderType_t : uint8 {
-    QRST_VERTEX = 0,
-    QRST_FRAGMENT,
-    QRST_COMPUTE,
-    QRST_GEOMETRY,
-    QRST_TESSELATOR,
-    QRST_TYPE_MAX
-};
-
-enum bufferType_t : uint8 {
-    QRBT_BUFFER,
-    QRBT_INDIRECT,
-    QRBT_INDEX,
-    QRBT_SHADER_MAX
-};
-
-enum bufferFlag_t : uint8 {
-    QRBF_DYNAMIC            = 1 << 0,
-    QRBF_READ               = 1 << 1,
-    QRBF_WRITE              = 1 << 2,
-    QRBF_PERSISTENT         = 1 << 3,
-    QRBF_COHERENT           = 1 << 4
-};
-
-enum imageAccess_t : uint8 {
-    QRIA_READ               = 1 << 1,
-    QRIA_WRITE              = 1 << 2
-};
-
-enum pipeBarrier_t : uint8 {
-    QRPB_CMD_BUFFER         = 1 << 0,
-    QRPB_SHADER_STORAGE     = 1 << 1,
-    QRPB_TXT_FETCH          = 1 << 2,
-    QRPB_IMG_ACCESS         = 1 << 3
-};
+#include <tier0.h>
 
 struct drawIndirect_t {
     uint count;
@@ -114,13 +45,17 @@ public:
 
     //create a given type of buffer with specified flags.
     virtual uint                CreateBuffer(uint8 type, uint8 flags, size_t sizePerElement, int elementCount) = 0;
+    [[deprecated("Use SetBufferData instead.")]]
     virtual void                PushDataIntoBuffer(uint buffer, size_t sizeOfData, void* data) = 0;
+    virtual void                SetBufferData(uint buffer, int offset, size_t sizeOfData, void* data) = 0;
     virtual void                SetBuffer(uint8 type, uint buffer) = 0;
     virtual void                SetBufferAtLocation(uint8 type, uint buffer, int location) = 0;
     //create a mapped buffer.
     virtual uint                CreateMappedBuffer() = 0;
 
-    virtual uint                CreateTexture(int width, int height, uint32 format, byte_t* data) = 0;
+    virtual uint                CreateTexture(int width, int height, uint32 format, const byte_t* data) = 0;
+    virtual Vector2             PackTexture2Uint32(uint64 handle) = 0;
+    virtual Vector2             MarkTextureBindless(uint texture) = 0;
     virtual void                DestroyTexture(uint texture) = 0;
     //probably want to use bindless textures will remake with that in mind
     virtual void                SetTextureAtSlot(uint texture, int slot) = 0;
@@ -128,6 +63,9 @@ public:
     virtual void                SetTextureAtSpecificLevelAtSlot(uint texture, int level, uint8 format, int slot) = 0;
     virtual void                BlitTextureToScreen(uint texture, int width, int height) = 0;
 
+    virtual void                EnableDepthTesting(bool pEnabled) = 0;
+    virtual void                EnableDepthWriting(bool pEnabled) = 0;
+    virtual void                SetDepthFunc(uint8 func) = 0;
     //indirect rendering command.
     virtual void                DrawIndexedIndirect(uint bufferForArgs, int drawCount) = 0;
 

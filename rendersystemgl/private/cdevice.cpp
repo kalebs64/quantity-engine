@@ -1,6 +1,21 @@
 #include "idevice.h"
+#include "enums.h"
 #include <glad/glad.h>
 #include <iostream>
+
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, 
+                                GLsizei length, const GLchar* message, const void* userParam) {
+        fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s/n",
+            (type == GL_DEBUG_TYPE_ERROR ? "error " : ""), type, severity, message);
+            // switch(severity) {
+            //     case GL_DEBUG_SEVERITY_HIGH:
+            //         std::cout << "error " << message << std::endl;
+            //         break;
+            //     case GL_DEBUG_SEVERITY_MEDIUM:
+            //         std::cout << "warning " << message << std::endl;
+            //         break;
+            // }
+}
 
 class CRenderDevice : public IRenderDevice {
 public:
@@ -19,28 +34,40 @@ public:
     virtual void                DispatchComputePipeline(uint groupsX, uint groupsY, uint groupsZ);
     virtual uint                CreateBuffer(uint8 type, uint8 flags, size_t sizePerElement, int elementCount);
     virtual void                PushDataIntoBuffer(uint buffer, size_t sizeOfData, void* data);
+    virtual void                SetBufferData(uint buffer, int offset, size_t sizeOfData, void* data);
     virtual void                SetBuffer(uint8 type, uint buffer);
     virtual void                SetBufferAtLocation(uint8 type, uint buffer, int location);
     virtual uint                CreateMappedBuffer();
-    virtual uint                CreateTexture(int width, int height, uint32 format, byte_t* data);
+    virtual uint                CreateTexture(int width, int height, uint32 format, const byte_t* data);
+    virtual Vector2             PackTexture2Uint32(uint64 handle);
+    virtual Vector2             MarkTextureBindless(uint texture);
     virtual void                DestroyTexture(uint texture);
     virtual void                SetTextureAtSlot(uint texture, int slot);
     virtual void                SetImageTextureAtSlot(uint texture, int level, uint8 accessFlags, uint32 format, int slot);
     virtual void                SetTextureAtSpecificLevelAtSlot(uint texture, int level, uint8 format, int slot);
     virtual void                BlitTextureToScreen(uint texture, int width, int height);
+    virtual void                EnableDepthTesting(bool pEnabled);
+    virtual void                EnableDepthWriting(bool pEnabled);
+    virtual void                SetDepthFunc(uint8 func);
     virtual void                DrawIndexedIndirect(uint bufferForArgs, int drawCount);
     virtual void                PipelineBarrierWait(uint8 barrier);
     virtual void                Flush();
 private:
     uint m_vao = 0;
+    uint m_blitFBO = 0;
 };
 
 CRenderDevice backend;
 IRenderDevice* g_renderDevice = &backend;
 
 void CRenderDevice::Init() {
+    glEnable(GL_DEBUG_OUTPUT);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    glDebugMessageCallback(MessageCallback, 0);
     glCreateVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
+    glCreateFramebuffers(1, &m_blitFBO);
 }
 
 void CRenderDevice::Shutdown() {
@@ -125,18 +152,6 @@ void CRenderDevice::RenderTargetSetColorArray(float* rgba) {
 }
 
 void CRenderDevice::RenderTargetClear(uint target, uint8 bufferTarget, float r, float g, float b) {
-    // GLbitfield glFormat = 0;
-
-    // if(targets & RDCT_COLOR) {
-    //     glFormat |= GL_COLOR_BUFFER_BIT;
-    // }
-    // if(targets & RDCT_DEPTH) {
-    //     glFormat |= GL_DEPTH_BUFFER_BIT;
-    // }
-    // if(targets & RDCT_STENCIL) {
-    //     glFormat |= GL_STENCIL_BUFFER_BIT;
-    // }
-    // if(glFormat != 0) glClear(glFormat);
     int attach = GL_COLOR;
 
     float value[4] = { r, g, b, 1.0f };
@@ -237,6 +252,12 @@ void CRenderDevice::PushDataIntoBuffer(uint buffer, size_t sizeOfData, void* dat
     glNamedBufferSubData(buffer, 0, sizeOfData, data);
 }
 
+void CRenderDevice::SetBufferData(uint buffer, int offset, size_t sizeOfData, void* data) {
+    if(data) {
+        glNamedBufferSubData(buffer, offset, sizeOfData, data);
+    }
+}
+
 void CRenderDevice::SetBuffer(uint8 type, uint buffer) {
     int gl = 0;
     switch(type) {
@@ -267,7 +288,7 @@ uint CRenderDevice::CreateMappedBuffer() {
     return 0;
 }
 
-uint CRenderDevice::CreateTexture(int width, int height, uint32 format, byte_t* data) {
+uint CRenderDevice::CreateTexture(int width, int height, uint32 format, const byte_t* data) {
     uint tex = 0;
     glCreateTextures(GL_TEXTURE_2D, 1, &tex);
 
@@ -305,6 +326,24 @@ uint CRenderDevice::CreateTexture(int width, int height, uint32 format, byte_t* 
     return tex;
 }
 
+Vector2 CRenderDevice::PackTexture2Uint32(uint64 handle) {
+    //32 bits for x & y each, this is done because my hardware doesn't support GL_ARB_gpu_shader_int64
+    return Uint2(static_cast<uint32_t>(handle & 0xFFFFFFFF), static_cast<uint32_t>(handle >> 32));
+}
+
+Vector2 CRenderDevice::MarkTextureBindless(uint texture) {
+    if(texture) {
+        uint64 handle = glGetTextureHandleARB(texture);
+
+        if(!glIsTextureHandleResidentARB(handle)) {
+            glMakeTextureHandleResidentARB(handle);
+        }
+
+        return PackTexture2Uint32(handle);
+    }
+    return Uint2(0,0);
+}
+
 void CRenderDevice::DestroyTexture(uint texture) {
     glDeleteTextures(1, &texture);
 }
@@ -314,11 +353,33 @@ void CRenderDevice::SetTextureAtSpecificLevelAtSlot(uint texture, int level, uin
 }
 
 void CRenderDevice::BlitTextureToScreen(uint texture, int width, int height) {
-    uint readFBO = 0;
-    glCreateFramebuffers(1, &readFBO);
-    glNamedFramebufferTexture(readFBO, GL_COLOR_ATTACHMENT0, texture, 0);
-    glBlitNamedFramebuffer(readFBO, 0, 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    glDeleteFramebuffers(1, &readFBO);
+    glNamedFramebufferTexture(m_blitFBO, GL_COLOR_ATTACHMENT0, texture, 0);
+    glBlitNamedFramebuffer(m_blitFBO, 0, 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+}
+
+void CRenderDevice::EnableDepthTesting(bool pEnabled) {
+    if(pEnabled) {
+        glEnable(GL_DEPTH_TEST);
+    }
+    else {
+        glDisable(GL_DEPTH_TEST);
+    }
+}
+
+void CRenderDevice::EnableDepthWriting(bool pEnabled) {
+    if(pEnabled) {
+        glDepthMask(GL_TRUE);
+    }
+    else {
+        glDepthMask(GL_FALSE);
+    }
+}
+
+
+void CRenderDevice::SetDepthFunc(uint8 func) {
+    if(func == RDFN_LESS) {
+        glDepthFunc(GL_LESS);
+    }
 }
 
 void CRenderDevice::DrawIndexedIndirect(uint bufferForArgs, int drawCount) {

@@ -12,16 +12,24 @@ struct frustumData_t {
     float       m_padding;
 };
 
-typedef struct materialData_s {
-    uint64      m_albedoTexHandle;
-    uint64      m_normalTexHandle;
-    float       m_baseColorTint[4];
-} materialData_t;
+struct ALIGN16 materialData_t {
+    Uint2      m_albedoGPU;
+    float      m_padding;
+    float      m_albedoFactor[4];
+    float      m_roughnessFactor;
+    float      m_metallicFactor;
+};
 
 typedef struct instanceData_s {
-    Matrix4f    m_worldMatrix;
+    Matrix4x4   m_worldMatrix;
     uint32      m_sliceID;
     uint32      m_materialID;
-    uint 		padding0;
-    uint 		padding1;
+    uint        m_padding0;
+    uint        m_padding1;
 } instanceData_t;
+
+struct frameConstants_t {
+    Matrix4x4   m_viewProj;
+    uint        m_frameInstanceCount;
+    float       m_padding[3];
+};

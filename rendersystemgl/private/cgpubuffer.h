@@ -1,26 +1,25 @@
 #pragma once
 #include <types.h>
 
-enum gpuBufferType_t : uint8 {
-    QGPU_BUFFER_GPU_STORAGE
-};
-
-enum gpuBufferFlag : uint8 {
-    QGPU_BUFFER_PERSISTENT,
-    QGPU_BUFFER_COHERENT
-};
-
 class CGPUBuffer {
 public:
-    void                Init(const char* name, int elementCount);
+                        CGPUBuffer();
+                        ~CGPUBuffer();
 
-    void                PushBackData();
+    void                Init(const char* pName, int pGPULocation, int pSizeOfElement, uint8 flags, int pInitialCount);
 
-    void                BindBuffer(uint8 type, int location);
+    void                WriteBufferDataTail(void* pData, int pWriteSize);
+    void                OverwriteBufferData(void* pData, int pWriteSize);
+
+    void                SetBuffer();
     void                FreeBinding();
 private:
-    int                 m_currentAllocationSize;
+    bool                m_allocatedName;
+    int                 m_positionInBuffer;
     int                 m_sizePerElement;
+    int                 m_bindLocation;
+
+    uint                m_buffer;
 
     const char*         m_name;
 };

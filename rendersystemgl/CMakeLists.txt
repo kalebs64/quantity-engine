@@ -6,7 +6,11 @@ set(BINARY_VERSION rendersystemgl)
 add_library(${BINARY_VERSION} SHARED
     ${GLSource}
     "private/cdevice.cpp"
+    "private/cgpubuffer.cpp"
+    "private/csharedvram.cpp"
     "private/cshadersystem.cpp"
+    "private/ctexture.cpp"
+    "private/ctexturesystem.cpp"
     "private/crenderworld.cpp"
     "private/crendersystem.cpp"
 )

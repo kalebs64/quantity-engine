@@ -4,6 +4,8 @@ set(BINARY_VERSION media)
 
 add_subdirectory("thirdparty/SDL")
 add_library(${BINARY_VERSION} SHARED
+    "private/cimageloader.cpp"
+    "private/cinputsystem.cpp"
     "private/cwindow.cpp"
     "private/cmedia.cpp"
 )

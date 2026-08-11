@@ -1,5 +1,7 @@
 #include "imedia.h"
 #include "cwindow.h"
+#include "iinputsystem.h"
+#include "iimageloader.h"
 #include <ifilesystem.h>
 
 DLL_FUNC_EXPORT void* CreateInterface(const char *name, int *returnValue);
@@ -56,6 +58,12 @@ bool CMedia::ConnectThroughFactory(InterfaceCreateFunc factory) {
 void* CMedia::QueryInterface(const char* interfaceName) {
     if(strcmp(interfaceName, QUANTITY_FILESYSTEM_VERSION) == 0) {
         return g_fileSystem;
+    }
+    if(strcmp(interfaceName, QUANTITY_INPUTSYSTEM_VERSION) == 0) {
+        return g_inputSystem;
+    }
+    if(strcmp(interfaceName, QUANTITY_IMAGELOADER_VERSION) == 0) {
+        return g_imageLoader;
     }
     return nullptr;
 }

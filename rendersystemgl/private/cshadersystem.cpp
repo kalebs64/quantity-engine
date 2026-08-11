@@ -1,5 +1,6 @@
 #include "ishadersystem.h"
 #include "idevice.h"
+#include "enums.h"
 #include <ifilesystem.h>
 #include <glad/glad.h>
 #include <unordered_map>

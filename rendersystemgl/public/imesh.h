@@ -2,9 +2,9 @@
 #include <types.h>
 
 struct vertex_t {
-    float pos[3];
-    float normal[3];
-    float uv[2];
+    float pos[4];
+    float normal[4];
+    float uv[4];
 };
 
 typedef struct poolSliceData_s {
