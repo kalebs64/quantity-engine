@@ -11,7 +11,8 @@ public:
     void                WriteBufferDataTail(void* pData, int pWriteSize);
     void                OverwriteBufferData(void* pData, int pWriteSize);
 
-    void                SetBuffer();
+    //set to -1 to use the default location buffer was initialized with.
+    void                SetBuffer(int pLocation);
     void                FreeBinding();
 private:
     bool                m_allocatedName;

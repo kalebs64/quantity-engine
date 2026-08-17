@@ -32,8 +32,11 @@ public:
     virtual uint                CreateShaderPipeline(uint* shaders, int count);
     virtual void                SetShaderPipeline(uint pipeline);
     virtual void                DispatchComputePipeline(uint groupsX, uint groupsY, uint groupsZ);
+    virtual void                SetDispatchBuffer(uint pDispatchBuffer);
+    virtual void                DispatchComputePipelineIndirect(int pOffset);
     virtual uint                CreateBuffer(uint8 type, uint8 flags, size_t sizePerElement, int elementCount);
     virtual void                PushDataIntoBuffer(uint buffer, size_t sizeOfData, void* data);
+    virtual void                GetBufferData(uint pBuffer, size_t pBufferOffset, size_t pBufferSize, void* pOutData);
     virtual void                SetBufferData(uint buffer, int offset, size_t sizeOfData, void* data);
     virtual void                SetBuffer(uint8 type, uint buffer);
     virtual void                SetBufferAtLocation(uint8 type, uint buffer, int location);
@@ -216,6 +219,14 @@ void CRenderDevice::DispatchComputePipeline(uint groupsX, uint groupsY, uint gro
     glDispatchCompute(groupsX, groupsY, groupsZ);
 }
 
+void CRenderDevice::SetDispatchBuffer(uint pDispatchBuffer) {
+    glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, pDispatchBuffer);
+}
+
+void CRenderDevice::DispatchComputePipelineIndirect(int pOffset) {
+    glDispatchComputeIndirect(pOffset);
+}
+
 uint CRenderDevice::CreateBuffer(uint8 type, uint8 flags, size_t sizePerElement, int elementCount) {
     uint32 glFlags = 0;
     int glType = 0;
@@ -252,6 +263,10 @@ void CRenderDevice::PushDataIntoBuffer(uint buffer, size_t sizeOfData, void* dat
     glNamedBufferSubData(buffer, 0, sizeOfData, data);
 }
 
+void CRenderDevice::GetBufferData(uint pBuffer, size_t pBufferOffset, size_t pBufferSize, void* pOutData) {
+    glGetNamedBufferSubData(pBuffer, pBufferOffset, pBufferSize, pOutData);
+}
+
 void CRenderDevice::SetBufferData(uint buffer, int offset, size_t sizeOfData, void* data) {
     if(data) {
         glNamedBufferSubData(buffer, offset, sizeOfData, data);
@@ -263,6 +278,7 @@ void CRenderDevice::SetBuffer(uint8 type, uint buffer) {
     switch(type) {
         case QRBT_BUFFER: gl = GL_SHADER_STORAGE_BUFFER; break;
         case QRBT_INDIRECT: gl = GL_DRAW_INDIRECT_BUFFER; break;
+        case QRBT_DISPATCH: gl = GL_DISPATCH_INDIRECT_BUFFER; break;
         default: break;
     }
 

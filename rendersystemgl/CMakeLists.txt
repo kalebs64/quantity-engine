@@ -11,6 +11,7 @@ add_library(${BINARY_VERSION} SHARED
     "private/cshadersystem.cpp"
     "private/ctexture.cpp"
     "private/ctexturesystem.cpp"
+    "private/cmaterialmanager.cpp"
     "private/crenderworld.cpp"
     "private/crendersystem.cpp"
 )

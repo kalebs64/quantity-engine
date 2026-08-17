@@ -10,7 +10,7 @@ class IRenderWorld {
 public:
     virtual void                Init() = 0;
     virtual void                Shutdown() = 0;
-    virtual void                SetViewData(Vector3f origin, Vector3f target, float fov) = 0;
+    virtual void                SetViewData(Vector3 origin, Vector3 target, float fov) = 0;
 
     virtual void                DrawProp(mesh_t* mesh, IMaterial* material = nullptr) = 0;
 

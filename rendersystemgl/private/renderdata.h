@@ -2,6 +2,8 @@
 #include <tier0.h>
 #include <types.h>
 
+constexpr int MAX_MATERIALS = 1024;
+
 struct plane_t {
     float x, y, z, w;
 };
@@ -14,10 +16,6 @@ struct frustumData_t {
 
 struct ALIGN16 materialData_t {
     Uint2      m_albedoGPU;
-    float      m_padding;
-    float      m_albedoFactor[4];
-    float      m_roughnessFactor;
-    float      m_metallicFactor;
 };
 
 typedef struct instanceData_s {

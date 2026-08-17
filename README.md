@@ -13,6 +13,19 @@ This used to be a more complete engine featuring entity components and some simp
 # Why such an odd coding style?
 My coding style comes from a long history of working with idTech 4, I used to mod it aspiring to make games with it. I think it is a pretty clean style it is quite readable in my eye.
 
+# What's next?
+I am currently building a very GPU driven render module inspired by Doom The Dark Ages rendering pipeline. At the moment I am implementing indirect compute based material dispatching.
+
+
+This is the renderer's state at the moment, using compute shaders I have split the renderer into several passes.
+1. Cbuff pass, this a compute dispatch that generates commands for indirect rendering.
+2. Visbuff pass, basic vertex + fragment pass, it generates a visibility buffer R8G8
+![AltText](readme_data/images/visbuffer.png)
+3. Material dispatch pass, compute pass, generates dispatch pixel buckets per material id.
+4. Dispatch command pass, compute pass, generates indirect dispatch command work groups with the previous buckets.
+5. Debug pass, compute pass, colors geometry with a generated color based on material id, and paints 16x16 tiles on the geometry (the shader's work group size).
+
+![AltText](readme_data/images/material-dispatch.png)
 # How do I make applications with this?
 ```cpp
 //Headers for all interface declarations.

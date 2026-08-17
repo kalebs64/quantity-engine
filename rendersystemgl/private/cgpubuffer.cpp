@@ -57,8 +57,13 @@ void CGPUBuffer::OverwriteBufferData(void* pData, int pWriteSize) {
     }
 }
 
-void CGPUBuffer::SetBuffer() {
-    g_renderDevice->SetBufferAtLocation(QRBT_BUFFER, m_buffer, m_bindLocation);
+void CGPUBuffer::SetBuffer(int pLocation) {
+    if(pLocation < 0) {
+        g_renderDevice->SetBufferAtLocation(QRBT_BUFFER, m_buffer, m_bindLocation);
+    }
+    else {
+        g_renderDevice->SetBufferAtLocation(QRBT_BUFFER, m_buffer, pLocation);
+    }
 }
 
 void CGPUBuffer::FreeBinding() {}

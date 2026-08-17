@@ -11,6 +11,14 @@ struct drawIndirect_t {
     uint baseInstance;
 };
 
+struct indirectDispatch_t {
+    uint m_groupCountX;
+    uint m_groupCountY;
+    uint m_groupCountZ;
+    uint m_pixelCount;
+    uint m_pixelBufferOffset;
+};
+
 //Backend class for doing OpenGL commands.
 stripped_vclass IRenderDevice {
 public:
@@ -42,11 +50,14 @@ public:
     //set the current shader
     virtual void                SetShaderPipeline(uint pipeline) = 0;
     virtual void                DispatchComputePipeline(uint groupsX, uint groupsY, uint groupsZ) = 0;
+    virtual void                SetDispatchBuffer(uint pDispatchBuffer) = 0;
+    virtual void                DispatchComputePipelineIndirect(int pOffset) = 0;
 
     //create a given type of buffer with specified flags.
     virtual uint                CreateBuffer(uint8 type, uint8 flags, size_t sizePerElement, int elementCount) = 0;
     [[deprecated("Use SetBufferData instead.")]]
     virtual void                PushDataIntoBuffer(uint buffer, size_t sizeOfData, void* data) = 0;
+    virtual void                GetBufferData(uint pBuffer, size_t pBufferOffset, size_t pBufferSize, void* pOutData) = 0;
     virtual void                SetBufferData(uint buffer, int offset, size_t sizeOfData, void* data) = 0;
     virtual void                SetBuffer(uint8 type, uint buffer) = 0;
     virtual void                SetBufferAtLocation(uint8 type, uint buffer, int location) = 0;

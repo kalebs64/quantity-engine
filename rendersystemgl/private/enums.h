@@ -51,6 +51,7 @@ enum shaderType_t : uint8 {
 enum bufferType_t : uint8 {
     QRBT_BUFFER,
     QRBT_INDIRECT,
+    QRBT_DISPATCH,
     QRBT_INDEX,
     QRBT_SHADER_MAX
 };

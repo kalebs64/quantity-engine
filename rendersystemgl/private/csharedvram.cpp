@@ -45,7 +45,7 @@ void CSharedVRAM::WriteToBufferTail(int pBufferId, void* pData, int pSizeOfData)
 }
 
 void CSharedVRAM::SetBuffer(int pBufferId) {
-    m_buffers[pBufferId].SetBuffer();
+    m_buffers[pBufferId].SetBuffer(-1);
 }
 
 void CSharedVRAM::ClearBuffer(int pBufferId) {

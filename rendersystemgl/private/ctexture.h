@@ -14,6 +14,8 @@ public:
 
     const char*                 Name() const {return m_name;}
     void                        SetName(const char* pName);
+
+    Uint2                       GetBindless() const {return m_bindlessHandle;}
 private:
     imageType_t                 m_type;
 

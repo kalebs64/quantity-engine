@@ -12,3 +12,16 @@ Of course you can do this on just the CPU with jobs, but where's the gimmick in 
 
 ## To-dos
 * Implement a job system for parallization on the CPU.
+* Make repo for `quantitystd` all needed data for a quantity made game to run.
+* Finish the renderer
+    - Inspired by Doom: The Dark Ages presentation for their visibility/deferred renderer, I have began to implement a material dispatch pass through buckets of pixels. The buckets are given to an indirect compute dispatch, so only geometry on the actual screen get shaded.
+    - Implement managers for:
+        * Materials
+        * Models
+        * Meshes
+        * Instances
+    - These all manage their own buffers and any render system ask for them so they can bind them during their passes
+    - Particle Renderer
+        * Particles are simulated on the GPU for some quick and easy parallism.
+        * Particle draw calls are generated on the GPU.
+        * Renderer generates a dispatch list for them, they get rendered to the screen.
