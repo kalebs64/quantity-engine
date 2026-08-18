@@ -67,7 +67,7 @@ void CMaterialManager::Init() {
     }
 
     std::string n = "material_buffer"+std::to_string(MAX_MATERIALS);
-    m_materialsGPU.Init(n.c_str(), 5, sizeof(materialData_t), QRBT_BUFFER, MAX_MATERIALS);
+    m_materialsGPU.Init(n.c_str(), 5, sizeof(materialData_t), QRBF_DYNAMIC | QRBF_READ, MAX_MATERIALS);
 
     m_materialsReloaded = true;
 }

@@ -7,12 +7,6 @@ Yes, it is quite inspired by Source Engine. :)
 # Status
 Currently getting rendersystemgl back to its former glory as this rewrite is pretty fresh.
 
-# Why so sparse?
-This used to be a more complete engine featuring entity components and some simple rendering tech, but now I am doing a major rewrite for modularization so I can encourage reusabilty and ease app relations.
-
-# Why such an odd coding style?
-My coding style comes from a long history of working with idTech 4, I used to mod it aspiring to make games with it. I think it is a pretty clean style it is quite readable in my eye.
-
 # What's next?
 I am currently building a very GPU driven render module inspired by Doom The Dark Ages rendering pipeline. At the moment I am implementing indirect compute based material dispatching.
 
